@@ -13,10 +13,17 @@ const OPENAI_API_URL: &str = "https://api.openai.com/v1";
 #[derive(Debug, Deserialize)]
 pub struct ChatCompletionChoice {
     pub text: String,
+    pub index: i32,
+    pub logprobs: Option<Value>,
+    pub finish_reason: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct ChatCompletionResponse {
+    pub id: String,
+    pub object: String,
+    pub created: i64,
+    pub model: String,
     pub choices: Vec<ChatCompletionChoice>,
 }
 
@@ -40,6 +47,8 @@ impl OpenAIClient {
                 json!({
                    "model": &self.config.openai_mod,
                    "prompt": prompt,
+                   "temperature": 0,
+                   "stop": ["#", "```"],
                 }),
             )?
             .json::<ChatCompletionResponse>()?;
@@ -48,8 +57,6 @@ impl OpenAIClient {
     }
 
     fn send_request(&self, url: &str, method: Method, body: Value) -> Result<Response> {
-        println!("{}", self.config.openai_key);
-
         let resp = self
             .client
             .request(method, format!("{OPENAI_API_URL}/{url}").as_str())

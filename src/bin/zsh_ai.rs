@@ -26,9 +26,7 @@ pub fn main() -> Result<()> {
     match cli.command {
         Commands::Completion(args) => match commands::completion::completion(args) {
             Ok(r) => {
-                r.choices.iter().for_each(|c| {
-                    println!("{}", c.text);
-                });
+                r.choices.first().map(|c| println!("{}", c.text));
             }
             Err(e) => eprintln!("Completion failed: {}", e),
         },
